@@ -22,6 +22,9 @@
         .card { background: rgba(26, 11, 46, 0.9); margin: 20px; padding: 25px; border-radius: 15px; box-shadow: 0 0 20px rgba(157, 0, 255, 0.2); border: 1px solid rgba(157, 0, 255, 0.3); }
         input { width: 100%; padding: 15px; border: 1px solid #4b0082; border-radius: 12px; font-size: 16px; margin: 10px 0; background: #0f0518; color: white; }
         input:focus { border-color: var(--accent); outline: none; }
+        input::placeholder { color: #666; }
+        
+        label { display: block; margin-top: 15px; color: var(--primary); font-size: 0.9em; margin-bottom: 5px; font-family: 'Cinzel', serif; }
         
         button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin: 5px 0; font-family: 'Lato'; }
         .btn-connect { background: linear-gradient(90deg, var(--primary), var(--accent)); color: white; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); }
@@ -58,8 +61,14 @@
     </div>
 
     <div id="login-card" class="card">
-        <p style="margin-top:0; color:#aaa; text-align: center;">Masukkan ID Spiritual Madam Ti' yang diberikan:</p>
+        <p style="margin-top:0; color:#aaa; text-align: center;">Silakan isi data spiritual Anda:</p>
+        
+        <label for="patientName">✦ Nama Anda</label>
+        <input type="text" id="patientName" placeholder="Contoh: Sari Dewi">
+        
+        <label for="adminId">✦ ID Spiritual Madam Ti'</label>
         <input type="text" id="adminId" placeholder="Contoh: MadamTi-1234">
+        
         <button class="btn-connect" onclick="connect()">Hubungkan Energi</button>
         <div id="status" class="status">Menunggu koneksi spiritual...</div>
     </div>
@@ -93,11 +102,20 @@
 
         function connect() {
             const adminId = document.getElementById('adminId').value.trim();
-            if(!adminId) return alert("Masukkan ID Madam Ti'!");
+            const patientName = document.getElementById('patientName').value.trim();
+            
+            if(!adminId) return alert("Masukkan ID Spiritual Madam Ti'!");
+            if(!patientName) return alert("Masukkan nama Anda terlebih dahulu!");
             
             conn = peer.connect(adminId);
             
             conn.on('open', () => {
+                // Kirim nama pasien ke Madam Ti'
+                conn.send({ 
+                    type: 'patientInfo', 
+                    name: patientName 
+                });
+                
                 document.getElementById('status').innerText = "✅ Terhubung dengan Madam Ti'!";
                 document.getElementById('status').style.color = "var(--accent)";
                 document.getElementById('login-card').style.display = 'none';
@@ -110,6 +128,10 @@
                 else box.innerHTML += `<div class="msg msg-in"><b>Madam Ti':</b> ${data.text}</div>`;
                 box.scrollTop = box.scrollHeight;
                 if(navigator.vibrate) navigator.vibrate(100);
+            });
+            
+            conn.on('error', (err) => {
+                alert("Gagal terhubung. Pastikan ID Spiritual benar!");
             });
         }
 
