@@ -31,7 +31,6 @@
         
         h1, h2, h3, .mystic-font { font-family: 'Cinzel', serif; }
 
-        /* CONTAINER UTAMA */
         .app-container {
             display: flex;
             height: 100%;
@@ -39,7 +38,6 @@
             overflow: hidden;
         }
 
-        /* SIDEBAR */
         .sidebar { 
             width: 320px; 
             background: var(--bg-panel); 
@@ -66,14 +64,15 @@
         .admin-id-box { 
             background: rgba(0,0,0,0.5); 
             border: 1px solid var(--primary);
-            padding: 8px; 
+            padding: 10px; 
             border-radius: 8px; 
             margin: 10px 0; 
             font-family: monospace; 
             color: var(--accent);
-            font-size: 0.9em;
-            text-shadow: 0 0 5px var(--accent);
-            word-break: break-all;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--accent);
+            letter-spacing: 5px;
         }
 
         .sidebar-tabs {
@@ -134,7 +133,6 @@
         .badge { background: var(--accent); color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.7em; font-weight: bold; box-shadow: 0 0 5px var(--accent); }
         .history-date { font-size: 0.65em; color: #666; margin-top: 2px; }
         
-        /* MAIN CHAT AREA */
         .main-chat { 
             flex: 1; 
             display: flex; 
@@ -218,7 +216,6 @@
             min-height: 0;
         }
         
-        /* MESSAGE BUBBLES */
         .message { 
             max-width: 85%; 
             padding: 10px 15px; 
@@ -238,13 +235,11 @@
         .msg-sys { background: rgba(0,0,0,0.6); color: var(--primary); align-self: center; font-size: 0.75em; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--primary); text-transform: uppercase; letter-spacing: 1px; text-align: center; }
         .msg-time { font-size: 0.6em; opacity: 0.6; margin-top: 4px; text-align: right; display: block; }
 
-        /* FILE ATTACHMENT */
         .file-attachment { margin-top: 6px; background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
         .file-attachment img { max-width: 100%; display: block; cursor: pointer; filter: brightness(0.9); }
         .file-info { padding: 6px; display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); }
         .download-btn { color: var(--accent); text-decoration: none; font-size: 0.8em; font-weight: 600; }
 
-        /* INPUT AREA */
         .input-area { 
             background: var(--bg-panel); 
             padding: 10px; 
@@ -294,7 +289,6 @@
         .btn-speaker { background: #1a4d2e; color: #4ade80; border: 1px solid #4ade80; display: none; }
         .btn-clear { background: #500000; color: #ff4444; border: 1px solid #ff4444; font-size: 0.75em; padding: 8px 10px; margin: 10px; width: calc(100% - 20px); }
 
-        /* EMPTY STATE */
         .empty-state { 
             position: absolute; 
             top: 0; left: 0; right: 0; bottom: 0; 
@@ -317,7 +311,6 @@
         }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* NOTIFICATION POPUP */
         .notification-popup {
             position: fixed;
             top: 20px;
@@ -339,79 +332,26 @@
         .notification-popup.show {
             transform: translateX(-50%) translateY(0);
         }
-        .notification-icon {
-            font-size: 1.5em;
-        }
-        .notification-content {
-            flex: 1;
-            min-width: 0;
-        }
-        .notification-title {
-            font-weight: bold;
-            font-size: 0.9em;
-            margin-bottom: 3px;
-        }
-        .notification-message {
-            font-size: 0.85em;
-            opacity: 0.9;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .notification-icon { font-size: 1.5em; }
+        .notification-content { flex: 1; min-width: 0; }
+        .notification-title { font-weight: bold; font-size: 0.9em; margin-bottom: 3px; }
+        .notification-message { font-size: 0.85em; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* MOBILE RESPONSIVE - UTAMA */
         @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .sidebar { 
-                position: fixed;
-                left: 0; 
-                top: 0; 
-                bottom: 0; 
-                width: 100%;
-                max-width: 100%;
-                z-index: 200;
-            }
-            .sidebar.hidden { 
-                transform: translateX(-100%); 
-            }
-            
-            .main-chat { 
-                width: 100%;
-            }
-            
-            .back-btn { 
-                display: flex !important;
-            }
-            
+            .app-container { flex-direction: column; }
+            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 100%; max-width: 100%; z-index: 200; }
+            .sidebar.hidden { transform: translateX(-100%); }
+            .main-chat { width: 100%; }
+            .back-btn { display: flex !important; }
             .admin-title { font-size: 1.1em; }
-            .patient-name { font-size: 0.9em; }
             .message { max-width: 90%; font-size: 0.85em; }
-            
-            .input-area {
-                gap: 6px;
-                padding: 8px;
-            }
-            
-            .icon-btn {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-                font-size: 1.1em;
-            }
-            
-            .chat-header {
-                height: 55px;
-                padding: 10px;
-            }
+            .input-area { gap: 6px; padding: 8px; }
+            .icon-btn { width: 38px; height: 38px; min-width: 38px; font-size: 1.1em; }
+            .chat-header { height: 55px; padding: 10px; }
         }
         
         @media (min-width: 769px) { 
-            .back-btn { 
-                display: none !important; 
-            }
+            .back-btn { display: none !important; }
         }
 
         #file-input, #camera-input { display: none; }
@@ -421,7 +361,6 @@
 </head>
 <body>
 
-<!-- NOTIFICATION POPUP -->
 <div id="notification" class="notification-popup">
     <div class="notification-icon"></div>
     <div class="notification-content">
@@ -431,33 +370,27 @@
 </div>
 
 <div class="app-container">
-    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="admin-header">
             <h1 class="admin-title mystic-font">🔮 Madam Ti'</h1>
-            <div class="admin-subtitle">Penerawang Online</div>
-            <div class="admin-id-box" id="my-id">Loading...</div>
+            <div class="admin-subtitle">ID Spiritual Anda</div>
+            <div class="admin-id-box" id="my-id">----</div>
             <button onclick="copyId()" style="background: rgba(255,255,255,0.1); border: 1px solid var(--primary); color: var(--accent); padding: 5px 15px; border-radius: 15px; font-size: 0.75em; cursor: pointer; font-family: 'Lato';">📋 Salin ID</button>
         </div>
         
-        <!-- Tabs -->
         <div class="sidebar-tabs">
-            <button class="tab-btn active" onclick="switchTab('active')">🟢 Aktif</button>
-            <button class="tab-btn" onclick="switchTab('history')">📜 History</button>
+            <button class="tab-btn active" onclick="switchTab('active')"> Aktif</button>
+            <button class="tab-btn" onclick="switchTab('history')"> History</button>
         </div>
 
-        <!-- Active List -->
         <ul id="patient-list" class="patient-list"></ul>
-        
-        <!-- History List -->
         <ul id="history-list" class="patient-list hidden"></ul>
         
         <div style="padding: 10px;">
-            <button class="btn-clear" onclick="clearHistory()">🗑️ Hapus Semua History</button>
+            <button class="btn-clear" onclick="clearHistory()">️ Hapus Semua History</button>
         </div>
     </div>
 
-    <!-- MAIN CHAT -->
     <div class="main-chat">
         <div id="empty-state" class="empty-state">
             <div class="crystal-ball"></div>
@@ -487,7 +420,7 @@
                 <label for="camera-input" class="icon-btn" title="Foto"></label>
                 <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
                 
-                <label for="file-input" class="icon-btn" title="File" style="font-size: 1em;">📎</label>
+                <label for="file-input" class="icon-btn" title="File" style="font-size: 1em;"></label>
                 <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
                 
                 <input type="text" id="msg-input" placeholder="Ketik pesan..." onkeypress="handleEnter(event)">
@@ -511,12 +444,13 @@
     let patientNames = {};
     const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
-    // Request notification permission
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
 
-    const adminId = 'MadamTi-' + Math.floor(Math.random() * 10000);
+    // GENERATE 4 DIGIT ID ONLY (0000-9999)
+    const adminId = String(Math.floor(1000 + Math.random() * 9000));
+    
     peer = new Peer(adminId, {
         debug: 2,
         config: {
@@ -534,6 +468,9 @@
 
     peer.on('error', (err) => {
         console.error('Peer Error:', err);
+        if (err.type === 'unavailable-id') {
+            alert('ID ini sudah digunakan. Silakan refresh untuk mendapatkan ID baru.');
+        }
     });
 
     peer.on('disconnected', () => {
@@ -559,12 +496,11 @@
             
             saveMessageToHistory(conn.peer, conn.patientData.name, data, 'in');
             
-            // NOTIFIKASI POPUP
             const senderName = conn.patientData.name || 'Anak Madam';
             const preview = data.type === 'file' ? '📷 Mengirim foto' : data.text;
             showNotification(senderName, preview);
             
-            conn.lastMessage = data.type === 'file' ? '📷 Foto' : (data.text || 'File');
+            conn.lastMessage = data.type === 'file' ? ' Foto' : (data.text || 'File');
             if (activePeerId === conn.peer) {
                 if (data.type === 'file') addFileToWindow(data, 'in');
                 else addMessageToWindow(data.text, 'in');
@@ -605,36 +541,26 @@
         }
     });
 
-    // --- NOTIFICATION FUNCTION ---
     function showNotification(title, message) {
-        // Browser Notification
         if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(title, {
-                body: message,
-                icon: '🔮',
-                vibrate: [200, 100, 200]
-            });
+            new Notification(title, { body: message, vibrate: [200, 100, 200] });
         }
         
-        // In-App Popup Notification
         const popup = document.getElementById('notification');
         document.getElementById('notif-title').innerText = title;
         document.getElementById('notif-message').innerText = message;
         
         popup.classList.add('show');
         
-        // Auto hide setelah 3 detik
         setTimeout(() => {
             popup.classList.remove('show');
         }, 3000);
         
-        // Klik popup untuk membuka chat
         popup.onclick = () => {
             popup.classList.remove('show');
         };
     }
 
-    // --- HISTORY FUNCTIONS ---
     function getHistory() {
         const history = localStorage.getItem('madamTi_history');
         return history ? JSON.parse(history) : {};
@@ -759,7 +685,6 @@
         }
     }
 
-    // --- LOUDSPEAKER ---
     function enableLoudspeaker() {
         const audio = document.getElementById('remote-audio');
         audio.volume = 1.0;
@@ -781,7 +706,6 @@
         btn.style.background = isSpeakerOn ? '#1a4d2e' : '#2d1b4e';
     }
 
-    // --- FILE HANDLING ---
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file || !activePeerId) return;
@@ -820,7 +744,6 @@
         reader.readAsDataURL(file);
     }
 
-    // --- CHAT FUNCTIONS ---
     function sendMessage() {
         if(!activePeerId) return;
         const input = document.getElementById('msg-input');
@@ -888,7 +811,6 @@
         win.document.write(`<body style="background:#000; margin:0; display:flex; justify-content:center; align-items:center; height:100vh;"><img src="${src}" style="max-width:100%; max-height:100%;"></body>`);
     }
 
-    // --- UI FUNCTIONS ---
     function updatePatientList() {
         if (currentTab !== 'active') return;
         const listEl = document.getElementById('patient-list');
@@ -908,13 +830,11 @@
             li.onclick = () => selectPatient(pid);
             
             const badgeCount = unreadCounts[pid] || 0;
-            const shortId = pid.split('-').pop();
             
             li.innerHTML = `
                 <div class="avatar">🔮</div>
                 <div class="patient-info">
                     <div class="patient-name">${patientData.name}</div>
-                    <div class="patient-real-name">ID: ${shortId}</div>
                     <div class="last-msg">${conn.lastMessage || 'Menunggu...'}</div>
                 </div>
                 ${badgeCount > 0 ? `<span class="badge">${badgeCount}</span>` : ''}
@@ -936,14 +856,13 @@
         document.getElementById('current-patient-realname').innerText = `● Terhubung`;
         document.getElementById('chat-window').innerHTML = '';
         
-        // Mobile: Hide sidebar
         if(window.innerWidth <= 768) {
             document.getElementById('sidebar').classList.add('hidden');
         }
         
         const history = getHistory();
         if (history[pid]) {
-            addSystemMessage(`📜 Memuat history...`);
+            addSystemMessage(` Memuat history...`);
             history[pid].messages.forEach(msg => {
                 if (msg.type === 'file') {
                     addFileToWindow({ type: 'file', data: msg.data, fileType: msg.fileType, name: msg.fileName, size: 0 }, msg.direction);
@@ -972,7 +891,6 @@
         document.getElementById('chat-window').appendChild(div);
     }
 
-    // --- CALL FUNCTIONS ---
     function startCall() {
         if(!activePeerId || !connections[activePeerId]) return;
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -994,7 +912,7 @@
         call.on('stream', (remoteStream) => {
             document.getElementById('remote-audio').srcObject = remoteStream;
             document.getElementById('remote-audio').play();
-            addSystemMessage("🔊 Suara Terbuka");
+            addSystemMessage(" Suara Terbuka");
         });
 
         call.on('close', endCallUI);
@@ -1020,7 +938,6 @@
         alert("ID Disalin: " + idText);
     }
 
-    // Keep session alive
     setInterval(() => {
         console.log('💫 Session aktif...');
     }, 60000);
