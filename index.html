@@ -10,8 +10,8 @@
         :root {
             --bg-dark: #0f0518;
             --bg-panel: #1a0b2e;
-            --primary: #9d00ff; /* Ungu Neon */
-            --accent: #ff007f; /* Pink Neon */
+            --primary: #9d00ff;
+            --accent: #ff007f;
             --text-main: #e0e0e0;
             --text-dim: #a0a0a0;
             --bubble-in: #2d1b4e;
@@ -96,6 +96,7 @@
         
         .patient-info { flex: 1; }
         .patient-name { font-weight: 600; color: #fff; margin-bottom: 4px; font-family: 'Cinzel', serif; }
+        .patient-real-name { font-size: 0.75em; color: var(--accent); margin-bottom: 4px; font-style: italic; }
         .last-msg { font-size: 0.85em; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
         .badge { background: var(--accent); color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.75em; font-weight: bold; box-shadow: 0 0 5px var(--accent); }
         
@@ -276,7 +277,7 @@
                 <button class="back-btn" onclick="backToSidebar()">←</button>
                 <div>
                     <div id="current-patient-name" class="mystic-font" style="font-weight: 600; color: #fff;">Anak Madam</div>
-                    <div style="font-size: 0.75em; color: var(--accent); text-shadow: 0 0 5px var(--accent);">● Terhubung Secara Spiritual</div>
+                    <div id="current-patient-realname" style="font-size: 0.75em; color: var(--accent); text-shadow: 0 0 5px var(--accent);">● Terhubung Secara Spiritual</div>
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">
@@ -311,7 +312,6 @@
     let unreadCounts = {};
     const MAX_FILE_SIZE = 500 * 1024; 
 
-    // ID Unik untuk Madam Ti'
     const adminId = 'MadamTi-' + Math.floor(Math.random() * 10000);
     peer = new Peer(adminId);
 
@@ -322,9 +322,20 @@
     peer.on('connection', (conn) => {
         connections[conn.peer] = conn;
         unreadCounts[conn.peer] = 0;
+        
+        // Simpan data pasien (nama akan dikirim setelah connect)
+        conn.patientData = { name: 'Menunggu nama...', id: conn.peer };
+        
         updatePatientList();
         
         conn.on('data', (data) => {
+            // Jika data adalah info pasien (nama)
+            if (data.type === 'patientInfo') {
+                conn.patientData.name = data.name;
+                updatePatientList();
+                return;
+            }
+            
             conn.lastMessage = data.type === 'file' ? '📷 Mengirim foto' : data.text;
             if (activePeerId === conn.peer) {
                 if (data.type === 'file') addFileToWindow(data, 'in');
@@ -467,6 +478,7 @@
 
         peers.forEach(pid => {
             const conn = connections[pid];
+            const patientData = conn.patientData || { name: 'Anonim', id: pid };
             const li = document.createElement('li');
             li.className = `patient-item ${activePeerId === pid ? 'active' : ''}`;
             li.onclick = () => selectPatient(pid);
@@ -477,7 +489,8 @@
             li.innerHTML = `
                 <div class="avatar">🔮</div>
                 <div class="patient-info">
-                    <div class="patient-name">Anak Madam ${shortId}</div>
+                    <div class="patient-name">${patientData.name}</div>
+                    <div class="patient-real-name">ID: ${shortId}</div>
                     <div class="last-msg">${conn.lastMessage || 'Menunggu...'}</div>
                 </div>
                 ${badgeCount > 0 ? `<span class="badge">${badgeCount}</span>` : ''}
@@ -490,17 +503,20 @@
         activePeerId = pid;
         unreadCounts[pid] = 0;
         
+        const patientData = connections[pid].patientData || { name: 'Anonim' };
+        
         document.getElementById('empty-state').classList.add('hidden');
         document.getElementById('chat-interface').classList.remove('hidden');
         document.getElementById('chat-interface').style.display = 'flex';
-        document.getElementById('current-patient-name').innerText = `Anak Madam ${pid.split('-').pop()}`;
+        document.getElementById('current-patient-name').innerText = patientData.name;
+        document.getElementById('current-patient-realname').innerText = `● Terhubung Secara Spiritual`;
         document.getElementById('chat-window').innerHTML = '';
         
         if(window.innerWidth <= 768) {
             document.getElementById('sidebar').classList.add('hidden');
         }
         
-        addSystemMessage(`Sesi Terawang Dimulai`);
+        addSystemMessage(`Sesi Terawang dengan ${patientData.name} Dimulai`);
         updatePatientList();
     }
 
