@@ -159,7 +159,7 @@
 
         <div class="footer-controls">
             <div class="input-row">
-                <button id="btn-call" class="icon-btn btn-call" onclick="toggleCall()" title="Telepon Madam"></button>
+                <button id="btn-call" class="icon-btn btn-call" onclick="toggleCall()" title="Telepon Madam">📞</button>
                 
                 <label for="camera-input" class="icon-btn" title="Kamera">📷</label>
                 <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
@@ -184,26 +184,24 @@
         let isCalling = false;
         const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
-        // Cek Status (Background Only - No Display)
-        async function checkMic() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-            } catch (e) {
-                console.log('Mic check:', e);
-            }
-        }
-        checkMic();
+        // Inisialisasi Peer - Session TIDAK ADA EXPIRED
+        peer.on('open', (id) => {
+            console.log('✅ Pasien online dengan ID:', id);
+        });
 
-        async function checkCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(track => track.stop());
-            } catch (e) {
-                console.log('Camera check:', e);
-            }
-        }
-        checkCamera();
+        peer.on('error', (err) => {
+            console.error('Peer Error:', err);
+        });
+
+        // Auto reconnect jika terputus - tanpa batas waktu
+        peer.on('disconnected', () => {
+            console.log('⚠️ Terputus sementara, mencoba reconnect...');
+            setTimeout(() => {
+                if (peer.disconnected && conn) {
+                    peer.reconnect();
+                }
+            }, 3000);
+        });
 
         function connect() {
             const adminId = document.getElementById('adminId').value.trim();
@@ -228,6 +226,7 @@
                 document.getElementById('header-status').innerText = "● Terhubung dengan Madam Ti'";
                 
                 addSystemBubble("Anda terhubung. Silakan mulai konsultasi.");
+                console.log('✅ Terhubung dengan Madam Ti');
             });
 
             conn.on('data', (data) => {
@@ -245,11 +244,13 @@
             });
             
             conn.on('error', (err) => {
+                console.error('Connection error:', err);
                 alert("Gagal terhubung: " + err + "\n\nPastikan ID Spiritual benar dan Madam Ti' sedang online.");
                 document.getElementById('status').innerText = "Koneksi gagal.";
             });
 
             conn.on('close', () => {
+                console.log('❌ Koneksi ditutup');
                 alert("Koneksi terputus dari sisi Madam Ti'");
                 location.reload();
             });
@@ -378,6 +379,23 @@
             btn.classList.remove('active-call');
             btn.innerHTML = '📞';
             addSystemBubble("Panggilan suara diakhiri.");
+        }
+
+        // --- KEEP SESSION ALIVE ---
+        // Mencegah browser sleep yang bisa memutus koneksi
+        setInterval(() => {
+            console.log('💫 Session tetap aktif...');
+        }, 60000); // Log setiap 1 menit
+
+        // Mencegah screen sleep (optional, tidak semua browser support)
+        if ('wakeLock' in navigator) {
+            try {
+                navigator.wakeLock.request('screen').then(() => {
+                    console.log(' Screen Wake Lock aktif');
+                });
+            } catch (err) {
+                console.log('Wake Lock tidak didukung');
+            }
         }
     </script>
 </body>

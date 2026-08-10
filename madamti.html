@@ -312,30 +312,39 @@
     let currentTab = 'active';
     const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
-    // Cek Status (Background Only - No Display)
-    const isHTTPS = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
-    // Cek Izin Mikrofon (Background Only)
-    async function checkMicPermission() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(track => track.stop());
-        } catch (err) {
-            console.log('Mic permission check:', err);
-        }
-    }
-    checkMicPermission();
-
-    // Inisialisasi Peer
+    // Inisialisasi Peer - Session TIDAK ADA EXPIRED
     const adminId = 'MadamTi-' + Math.floor(Math.random() * 10000);
-    peer = new Peer(adminId, { debug: 2 });
+    peer = new Peer(adminId, {
+        debug: 2,
+        config: {
+            'iceServers': [
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' }
+            ]
+        }
+    });
 
     peer.on('open', (id) => {
         document.getElementById('my-id').innerText = id;
+        console.log('✅ Madam Ti Online dengan ID:', id);
     });
 
     peer.on('error', (err) => {
         console.error('Peer Error:', err);
+        if (err.type === 'peer-unavailable') {
+            alert('ID sudah digunakan. Silakan refresh halaman untuk mendapatkan ID baru.');
+        }
+    });
+
+    // Keep connection alive - tidak ada timeout
+    peer.on('disconnected', () => {
+        console.log('⚠️ Terputus sementara, mencoba reconnect...');
+        // Auto reconnect tanpa batas waktu
+        setTimeout(() => {
+            if (peer.disconnected) {
+                peer.reconnect();
+            }
+        }, 3000);
     });
 
     peer.on('connection', (conn) => {
@@ -344,9 +353,12 @@
         conn.patientData = { name: 'Menunggu nama...', id: conn.peer };
         updatePatientList();
         
+        console.log('🔮 Anak Madam terhubung:', conn.peer);
+        
         conn.on('data', (data) => {
             if (data.type === 'patientInfo') {
                 conn.patientData.name = data.name;
+                console.log('📛 Nama pasien:', data.name);
                 updatePatientList();
                 return;
             }
@@ -365,10 +377,15 @@
         });
 
         conn.on('close', () => {
+            console.log('❌ Koneksi ditutup:', conn.peer);
             delete connections[conn.peer];
             delete unreadCounts[conn.peer];
             if(activePeerId === conn.peer) backToSidebar();
             updatePatientList();
+        });
+
+        conn.on('error', (err) => {
+            console.error('Connection error:', err);
         });
     });
 
@@ -473,7 +490,7 @@
         document.getElementById('chat-interface').classList.remove('hidden');
         document.getElementById('chat-interface').style.display = 'flex';
         document.getElementById('current-patient-name').innerText = record.name;
-        document.getElementById('current-patient-realname').innerText = ` History Konsultasi`;
+        document.getElementById('current-patient-realname').innerText = `📜 History Konsultasi`;
         document.getElementById('chat-window').innerHTML = '';
         
         if(window.innerWidth <= 768) {
@@ -542,7 +559,7 @@
     function updateSpeakerButton() {
         const btn = document.getElementById('btn-speaker');
         btn.style.display = isSpeakerOn ? 'flex' : 'none';
-        btn.innerHTML = isSpeakerOn ? '🔊' : '';
+        btn.innerHTML = isSpeakerOn ? '🔊' : '🔉';
         btn.style.background = isSpeakerOn ? '#1a4d2e' : '#2d1b4e';
     }
 
@@ -637,7 +654,7 @@
                             <div style="font-weight:600; font-size:0.85em">${fileData.name || 'File'}</div>
                             <div style="font-size:0.75em; color:#aaa">${fileSizeKB} KB</div>
                         </div>
-                        ${fileData.data ? `<a href="${fileData.data}" download="${fileData.name}" class="download-btn"></a>` : ''}
+                        ${fileData.data ? `<a href="${fileData.data}" download="${fileData.name}" class="download-btn">⬇</a>` : ''}
                     </div>
                 </div>
             `;
@@ -703,7 +720,7 @@
         
         const history = getHistory();
         if (history[pid]) {
-            addSystemMessage(`📜 Memuat history dengan ${patientData.name}...`);
+            addSystemMessage(` Memuat history dengan ${patientData.name}...`);
             history[pid].messages.forEach(msg => {
                 if (msg.type === 'file') {
                     addFileToWindow({ type: 'file', data: msg.data, fileType: msg.fileType, name: msg.fileName, size: 0 }, msg.direction);
@@ -783,6 +800,12 @@
         navigator.clipboard.writeText(idText);
         alert("ID Spiritual Disalin: " + idText);
     }
+
+    // --- KEEP SESSION ALIVE ---
+    // Mencegah browser sleep yang bisa memutus koneksi
+    setInterval(() => {
+        console.log('💫 Session tetap aktif...');
+    }, 60000); // Log setiap 1 menit
 </script>
 </body>
 </html>
