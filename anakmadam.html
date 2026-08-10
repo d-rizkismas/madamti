@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Hubungi Madam Ti'</title>
+
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #07020d;
+            --bg-panel: rgba(26, 11, 46, 0.94);
+            --primary: #9d00ff;
+            --accent: #ff007f;
+            --pink-soft: #ff5ab3;
+            --text-main: #f4eaff;
+            --text-dim: #bba7cc;
+            --bubble-in: #2d1b4e;
+            --bubble-out: linear-gradient(135deg, #ff007f, #9d00ff);
+            --danger: #ff3b30;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(157, 0, 255, 0.35), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(255, 0, 127, 0.25), transparent 35%),
+                #000;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        h1, h2, h3, .mystic-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        .app {
+            width: 100%;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-header {
+            flex-shrink: 0;
+            min-height: 72px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #4b0082, #090012);
+            border-bottom: 1px solid rgba(255, 0, 127, 0.5);
+            box-shadow: 0 0 18px rgba(157, 0, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .top-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 12px var(--primary);
+        }
+
+        .top-header small {
+            display: block;
+            margin-top: 4px;
+            font-family: 'Lato', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        /* LOGIN */
+        .login-screen {
+            flex: 1;
+            min-height: 0;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-panel);
+            border: 1px solid rgba(157, 0, 255, 0.45);
+            box-shadow:
+                0 0 25px rgba(157, 0, 255, 0.25),
+                inset 0 0 20px rgba(255, 0, 127, 0.05);
+            border-radius: 22px;
+            padding: 20px;
+        }
+
+        .crystal {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            margin: 0 auto 14px;
+            background: radial-gradient(circle at 30% 25%, #fff, #d76bff 18%, #9d00ff 45%, #10001d 78%);
+            box-shadow: 0 0 28px rgba(157, 0, 255, 0.8);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-7px); }
+        }
+
+        .login-card p {
+            margin: 0 0 14px;
+            color: var(--text-dim);
+            text-align: center;
+            line-height: 1.5;
+            font-size: 0.92rem;
+        }
+
+        .field-label {
+            display: block;
+            color: var(--pink-soft);
+            font-size: 0.82rem;
+            margin: 12px 0 6px;
+            letter-spacing: 0.4px;
+            font-family: 'Cinzel', serif;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid rgba(157, 0, 255, 0.65);
+            background: rgba(8, 2, 18, 0.95);
+            color: white;
+            outline: none;
+            border-radius: 14px;
+            padding: 14px 15px;
+            font-size: 16px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.35);
+        }
+
+        button {
+            font-family: 'Lato', sans-serif;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-connect {
+            width: 100%;
+            margin-top: 16px;
+            padding: 15px;
+            border-radius: 16px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 0 18px rgba(255, 0, 127, 0.35);
+        }
+
+        .btn-connect:active {
+            transform: scale(0.98);
+        }
+
+        .status {
+            text-align: center;
+            color: var(--text-dim);
+            margin-top: 12px;
+            font-size: 0.82rem;
+        }
+
+        /* CHAT SCREEN */
+        .chat-screen {
+            display: none;
+            flex: 1;
+            min-height: 0;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-status-bar {
+            flex-shrink: 0;
+            height: 42px;
+            padding: 0 14px;
+            background: rgba(10, 2, 20, 0.92);
+            border-bottom: 1px solid rgba(157, 0, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .status-left {
+            min-width: 0;
+        }
+
+        .connected-title {
+            font-size: 0.88rem;
+            color: #fff;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .connected-subtitle {
+            font-size: 0.68rem;
+            color: var(--pink-soft);
+        }
+
+        .call-pill {
+            flex-shrink: 0;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 0, 127, 0.12);
+            color: var(--pink-soft);
+            border: 1px solid rgba(255, 0, 127, 0.45);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .chat-box {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg {
+            max-width: 82%;
+            padding: 11px 14px;
+            border-radius: 18px;
+            font-size: 0.94rem;
+            line-height: 1.45;
+            word-wrap: break-word;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            animation: popIn 0.18s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.96); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .msg-in {
+            align-self: flex-start;
+            background: var(--bubble-in);
+            color: #fff;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(157, 0, 255, 0.3);
+        }
+
+        .msg-out {
+            align-self: flex-end;
+            background: var(--bubble-out);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-system {
+            align-self: center;
+            max-width: 92%;
+            background: rgba(0,0,0,0.45);
+            color: var(--text-dim);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            padding: 7px 12px;
+            text-align: center;
+        }
+
+        .msg-time {
+            display: block;
+            text-align: right;
+            margin-top: 4px;
+            font-size: 0.65rem;
+            opacity: 0.65;
+        }
+
+        .file-attachment {
+            margin-top: 4px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .file-attachment img {
+            display: block;
+            max-width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px;
+            background: rgba(0,0,0,0.38);
+        }
+
+        .file-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .file-size {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .download-link {
+            margin-left: auto;
+            flex-shrink: 0;
+            color: var(--pink-soft);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        /* BOTTOM PANEL: SEMUA FITUR DI 1 LAYAR */
+        .bottom-panel {
+            flex-shrink: 0;
+            background: rgba(14, 3, 28, 0.98);
+            border-top: 1px solid rgba(157, 0, 255, 0.35);
+            padding: 8px 10px max(10px, env(safe-area-inset-bottom));
+            box-shadow: 0 -8px 24px rgba(0,0,0,0.35);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.4fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .tool-btn {
+            height: 42px;
+            border-radius: 14px;
+            background: rgba(45, 27, 78, 0.95);
+            color: #fff;
+            border: 1px solid rgba(157, 0, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .tool-btn:active {
+            transform: scale(0.98);
+        }
+
+        .call-btn {
+            background: linear-gradient(135deg, rgba(157,0,255,0.95), rgba(255,0,127,0.95));
+            box-shadow: 0 0 14px rgba(255, 0, 127, 0.28);
+        }
+
+        .end-call-btn {
+            display: none;
+            background: rgba(120, 0, 25, 0.95);
+            color: #fff;
+            border-color: rgba(255, 59, 48, 0.7);
+        }
+
+        .composer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .composer input {
+            flex: 1;
+            margin: 0;
+            height: 46px;
+            border-radius: 999px;
+            padding: 0 15px;
+        }
+
+        .send-btn {
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 900;
+            box-shadow: 0 0 14px rgba(255, 0, 127, 0.45);
+        }
+
+        .send-btn:active {
+            transform: scale(0.94);
+        }
+
+        #camera-input,
+        #file-input {
+            display: none;
+        }
+
+        audio {
+            display: none;
+        }
+
+        @media (max-height: 650px) {
+            .top-header {
+                min-height: 58px;
+                padding: 8px 12px;
+            }
+
+            .top-header h2 {
+                font-size: 0.95rem;
+            }
+
+            .top-header small {
+                display: none;
+            }
+
+            .login-card {
+                padding: 16px;
+            }
+
+            .crystal {
+                width: 56px;
+                height: 56px;
+                margin-bottom: 10px;
+            }
+
+            .chat-status-bar {
+                height: 36px;
+            }
+
+            .tool-btn {
+                height: 38px;
+                font-size: 0.78rem;
+            }
+
+            .composer input,
+            .send-btn {
+                height: 42px;
+            }
+
+            .send-btn {
+                width: 42px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <div class="top-header">
+        <div>
+            <h2>🔮 Konsultasi Madam Ti'</h2>
+            <small>Ruang Terawang Anak Madam</small>
+        </div>
+    </div>
+
+    <!-- FORM AWAL -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="crystal"></div>
+
+            <p>
+                Masukkan nama Anda dan ID Spiritual Madam Ti'
+                untuk membuka jalur konsultasi.
+            </p>
+
+            <label class="field-label" for="patientName">✦ Nama Anak Madam</label>
+            <input type="text" id="patientName" placeholder="Contoh: Sari Dewi">
+
+            <label class="field-label" for="adminId">✦ ID Spiritual Madam Ti'</label>
+            <input type="text" id="adminId" placeholder="Contoh: MadamTi-1234">
+
+            <button class="btn-connect" onclick="connect()">
+                Hubungkan Energi
+            </button>
+
+            <div id="status" class="status">
+                Menunggu koneksi spiritual...
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT SATU LAYAR -->
+    <div id="chat-screen" class="chat-screen">
+
+        <div class="chat-status-bar">
+            <div class="status-left">
+                <div class="connected-title" id="connectedName">Terhubung dengan Madam Ti'</div>
+                <div class="connected-subtitle">● Jalur spiritual aktif</div>
+            </div>
+
+            <div class="call-pill" id="callStatus">
+                Chat Aktif
+            </div>
+        </div>
+
+        <div id="chat-box" class="chat-box"></div>
+
+        <!-- Semua fitur utama ada di panel bawah ini -->
+        <div class="bottom-panel">
+
+            <div class="quick-actions">
+                <label for="camera-input" class="tool-btn">
+                    📷 Foto
+                </label>
+                <input
+                    type="file"
+                    id="camera-input"
+                    accept="image/*"
+                    capture="environment"
+                    onchange="handleFileSelect(event)"
+                >
+
+                <label for="file-input" class="tool-btn">
+                    📜 File
+                </label>
+                <input
+                    type="file"
+                    id="file-input"
+                    accept="image/*,.pdf,.doc,.docx,.txt"
+                    onchange="handleFileSelect(event)"
+                >
+
+                <button id="btn-call" class="tool-btn call-btn" onclick="callAdmin()">
+                    📞 Telepon Madam
+                </button>
+
+                <button id="btn-end-call" class="tool-btn end-call-btn" onclick="endCall()">
+                    📴 Tutup Telepon
+                </button>
+            </div>
+
+            <div class="composer">
+                <input
+                    type="text"
+                    id="msgInput"
+                    placeholder="Ketik pesan..."
+                    onkeypress="handleEnter(event)"
+                >
+                <button class="send-btn" onclick="sendMsg()">➤</button>
+            </div>
+
+        </div>
+    </div>
+
+    <audio id="remoteAudio" autoplay></audio>
+
+</div>
+
+<script>
+    let peer = new Peer();
+    let conn = null;
+    let call = null;
+    let localStream = null;
+    let currentPatientName = '';
+
+    // Maksimal foto/file 3 MB
+    const MAX_FILE_SIZE = 3 * 1024 * 1024;
+
+    peer.on('open', (id) => {
+        console.log('ID Anak Madam:', id);
+    });
+
+    // Jika Madam Ti' yang menelepon duluan
+    peer.on('call', async (incomingCall) => {
+        const accept = confirm("Madam Ti' membuka saluran suara. Terima panggilan?");
+        if (!accept) {
+            incomingCall.close();
+            return;
+        }
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream = stream;
+            incomingCall.answer(stream);
+            handleCall(incomingCall);
+            addSystemMessage("🔊 Saluran suara dari Madam Ti' terbuka");
+        } catch (err) {
+            alert("Gagal membuka mikrofon.");
+        }
+    });
+
+    peer.on('error', (err) => {
+        console.error(err);
+        setStatus("Terjadi gangguan koneksi spiritual.", true);
+    });
+
+    function connect() {
+        const adminId = document.getElementById('adminId').value.trim();
+        const patientName = document.getElementById('patientName').value.trim();
+
+        if (!patientName) {
+            alert("Masukkan nama Anda terlebih dahulu.");
+            return;
+        }
+
+        if (!adminId) {
+            alert("Masukkan ID Spiritual Madam Ti'.");
+            return;
+        }
+
+        currentPatientName = patientName;
+
+        setStatus("Menghubungkan energi...");
+
+        conn = peer.connect(adminId);
+
+        conn.on('open', () => {
+            conn.send({
+                type: 'patientInfo',
+                name: patientName
+            });
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+
+            document.getElementById('connectedName').innerText = `${patientName} terhubung dengan Madam Ti'`;
+
+            addSystemMessage("Koneksi spiritual terbuka. Silakan mulai konsultasi.");
+        });
+
+        conn.on('data', (data) => {
+            if (data.type === 'file') {
+                addFileToBox(data, 'in');
+            } else if (data.type === 'text') {
+                addMessageToBox(`Madam Ti': ${data.text}`, 'in');
+            }
+
+            if (navigator.vibrate) navigator.vibrate(100);
+        });
+
+        conn.on('close', () => {
+            addSystemMessage("Koneksi dengan Madam Ti' terputus.");
+        });
+
+        conn.on('error', () => {
+            setStatus("Gagal terhubung. Pastikan ID Spiritual benar.", true);
+        });
+    }
+
+    function setStatus(text, isError = false) {
+        const status = document.getElementById('status');
+        status.innerText = text;
+        status.style.color = isError ? '#ff3b30' : 'var(--text-dim)';
+    }
+
+    function handleEnter(event) {
+        if (event.key === 'Enter') {
+            sendMsg();
+        }
+    }
+
+    function sendMsg() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+
+        if (!text) return;
+
+        if (!conn || !conn.open) {
+            alert("Belum terhubung dengan Madam Ti'.");
+            return;
+        }
+
+        conn.send({
+            type: 'text',
+            text: text
+        });
+
+        addMessageToBox(text, 'out');
+        input.value = '';
+    }
+
+    async function handleFileSelect(event) {
+        const file = event.target.files[0];
+        event.target.value = '';
+
+        if (!file) return;
+
+        if (!conn || !conn.open) {
+            alert("Belum terhubung dengan Madam Ti'.");
+            return;
+        }
+
+        let finalFile = file;
+
+        try {
+            // Jika foto lebih dari 3 MB, coba kompres otomatis
+            if (file.type.startsWith('image/') && file.size > MAX_FILE_SIZE) {
+                addSystemMessage("⏳ Foto lebih dari 3 MB, sedang diperkecil otomatis...");
+                finalFile = await compressImage(file, MAX_FILE_SIZE);
+            }
+
+            if (finalFile.size > MAX_FILE_SIZE) {
+                alert(`File terlalu besar. Maksimal 3 MB. Ukuran file Anda: ${formatMB(finalFile.size)} MB`);
+                return;
+            }
+
+            addSystemMessage("⏳ Mengirim berkas...");
+
+            const dataUrl = await fileToDataURL(finalFile);
+
+            const fileData = {
+                type: 'file',
+                name: finalFile.name || file.name,
+                size: finalFile.size,
+                fileType: finalFile.type || file.type,
+                data: dataUrl
+            };
+
+            conn.send(fileData);
+            addFileToBox(fileData, 'out');
+
+        } catch (err) {
+            console.error(err);
+            alert("Gagal memproses file.");
+        }
+    }
+
+    function fileToDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function compressImage(file, maxBytes) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+
+            img.onload = async () => {
+                URL.revokeObjectURL(url);
+
+                let width = img.width;
+                let height = img.height;
+
+                const maxDimension = 1600;
+
+                if (width > maxDimension || height > maxDimension) {
+                    const ratio = maxDimension / Math.max(width, height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                }
+
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                let quality = 0.85;
+                let blob = await canvasToBlob(canvas, quality);
+
+                while (blob.size > maxBytes && quality > 0.45) {
+                    quality -= 0.1;
+                    blob = await canvasToBlob(canvas, quality);
+                }
+
+                while (blob.size > maxBytes && width > 800) {
+                    width = Math.round(width * 0.85);
+                    height = Math.round(height * 0.85);
+
+                    canvas = document.createElement('canvas');
+                    ctx = canvas.getContext('2d');
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    quality = 0.75;
+                    blob = await canvasToBlob(canvas, quality);
+                }
+
+                const newName = file.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg';
+
+                try {
+                    const compressedFile = new File([blob], newName, { type: 'image/jpeg' });
+                    resolve(compressedFile);
+                } catch (e) {
+                    blob.name = newName;
+                    resolve(blob);
+                }
+            };
+
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
+
+    function canvasToBlob(canvas, quality) {
+        return new Promise((resolve) => {
+            canvas.toBlob(
+                (blob) => resolve(blob),
+                'image/jpeg',
+                quality
+            );
+        });
+    }
+
+    function addMessageToBox(text, type) {
+        const box = document.getElementById('chat-box');
+
+        const msg = document.createElement('div');
+        msg.className = `msg msg-${type}`;
+
+        const safeText = escapeHTML(text);
+
+        msg.innerHTML = `
+            ${safeText}
+            <span class="msg-time">${getTime()}</span>
+        `;
+
+        box.appendChild(msg);
+        scrollChatToBottom();
+    }
+
+    function addSystemMessage(text) {
+        const box = document.getElementById('chat-box');
+
+        const msg = document.createElement('div');
+        msg.className = 'msg-system';
+        msg.innerText = text;
+
+        box.appendChild(msg);
+        scrollChatToBottom();
+    }
+
+    function addFileToBox(fileData, type) {
+        const box = document.getElementById('chat-box');
+
+        const msg = document.createElement('div');
+        msg.className = `msg msg-${type}`;
+
+        const isImage = fileData.fileType && fileData.fileType.startsWith('image/');
+        const sizeText = `${formatMB(fileData.size)} MB`;
+
+        if (isImage) {
+            msg.innerHTML = `
+                <div class="file-attachment">
+                    <img src="${fileData.data}" alt="Foto" onclick="viewImage('${fileData.data}')">
+                </div>
+                <span class="msg-time">${getTime()} • ${sizeText}</span>
+            `;
+        } else {
+            msg.innerHTML = `
+                <div class="file-attachment">
+                    <div class="file-info">
+                        <span style="font-size:1.4rem;">📜</span>
+                        <div style="min-width:0;">
+                            <div class="file-name">${escapeHTML(fileData.name)}</div>
+                            <div class="file-size">${sizeText}</div>
+                        </div>
+                        <a href="${fileData.data}" download="${escapeHTML(fileData.name)}" class="download-link">
+                            Simpan
+                        </a>
+                    </div>
+                </div>
+                <span class="msg-time">${getTime()}</span>
+            `;
+        }
+
+        box.appendChild(msg);
+        scrollChatToBottom();
+    }
+
+    function viewImage(src) {
+        const win = window.open();
+        win.document.write(`
+            <body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;">
+                <img src="${src}" style="max-width:100%;max-height:100%;object-fit:contain;">
+            </body>
+        `);
+    }
+
+    function scrollChatToBottom() {
+        const box = document.getElementById('chat-box');
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function getTime() {
+        return new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function formatMB(bytes) {
+        return (bytes / 1024 / 1024).toFixed(2);
+    }
+
+    function escapeHTML(text) {
+        const div = document.createElement('div');
+        div.innerText = text;
+        return div.innerHTML;
+    }
+
+    async function callAdmin() {
+        const adminId = document.getElementById('adminId').value.trim();
+
+        if (!adminId) {
+            alert("ID Spiritual Madam Ti' belum diisi.");
+            return;
+        }
+
+        if (!conn || !conn.open) {
+            alert("Hubungkan energi terlebih dahulu sebelum telepon.");
+            return;
+        }
+
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            call = peer.call(adminId, localStream);
+
+            handleCall(call);
+            addSystemMessage("📞 Memanggil Madam Ti'...");
+
+        } catch (err) {
+            alert("Gagal membuka mikrofon. Pastikan izin mikrofon diberikan.");
+        }
+    }
+
+    function handleCall(activeCall) {
+        call = activeCall;
+
+        document.getElementById('btn-call').style.display = 'none';
+        document.getElementById('btn-end-call').style.display = 'flex';
+        document.getElementById('callStatus').innerText = 'Telepon Aktif';
+
+        call.on('stream', (remoteStream) => {
+            const audio = document.getElementById('remoteAudio');
+            audio.srcObject = remoteStream;
+            audio.play();
+
+            addSystemMessage("🔊 Saluran suara dengan Madam Ti' terbuka");
+        });
+
+        call.on('close', () => {
+            endCallUI();
+        });
+    }
+
+    function endCall() {
+        if (call) {
+            call.close();
+            call = null;
+        }
+
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+
+        endCallUI();
+        addSystemMessage("Saluran suara ditutup.");
+    }
+
+    function endCallUI() {
+        document.getElementById('btn-call').style.display = 'flex';
+        document.getElementById('btn-end-call').style.display = 'none';
+        document.getElementById('callStatus').innerText = 'Chat Aktif';
+    }
+</script>
+
+</body>
+</html>
