@@ -147,7 +147,7 @@
             <input type="text" id="patientName" placeholder="Masukkan nama Anda">
             
             <label>✦ ID Spiritual Madam Ti'</label>
-            <input type="text" id="adminId" placeholder="Minta ID sama Madam Ti'">
+            <input type="text" id="adminId" placeholder="Contoh: MadamTi-1234">
             
             <button class="btn-connect" onclick="connect()">Hubungkan Energi</button>
             <div id="status" class="status">Menunggu koneksi spiritual...</div>
@@ -159,7 +159,7 @@
 
         <div class="footer-controls">
             <div class="input-row">
-                <button id="btn-call" class="icon-btn btn-call" onclick="toggleCall()" title="Telepon Madam">📞</button>
+                <button id="btn-call" class="icon-btn btn-call" onclick="toggleCall()" title="Telepon Madam"></button>
                 
                 <label for="camera-input" class="icon-btn" title="Kamera">📷</label>
                 <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
@@ -182,7 +182,28 @@
         let call = null;
         let localStream = null;
         let isCalling = false;
-        const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+        const MAX_FILE_SIZE = 3 * 1024 * 1024;
+
+        // Cek Status (Background Only - No Display)
+        async function checkMic() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                console.log('Mic check:', e);
+            }
+        }
+        checkMic();
+
+        async function checkCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                console.log('Camera check:', e);
+            }
+        }
+        checkCamera();
 
         function connect() {
             const adminId = document.getElementById('adminId').value.trim();
@@ -192,6 +213,11 @@
             if(!adminId) return alert("Masukkan ID Spiritual Madam Ti'!");
             
             document.getElementById('status').innerText = "Menghubungkan...";
+            
+            if (peer.disconnected) {
+                peer.reconnect();
+            }
+            
             conn = peer.connect(adminId);
             
             conn.on('open', () => {
@@ -218,9 +244,14 @@
                 if(navigator.vibrate) navigator.vibrate(100);
             });
             
-            conn.on('error', () => {
-                alert("Gagal terhubung. Pastikan ID Spiritual benar!");
+            conn.on('error', (err) => {
+                alert("Gagal terhubung: " + err + "\n\nPastikan ID Spiritual benar dan Madam Ti' sedang online.");
                 document.getElementById('status').innerText = "Koneksi gagal.";
+            });
+
+            conn.on('close', () => {
+                alert("Koneksi terputus dari sisi Madam Ti'");
+                location.reload();
             });
         }
 
@@ -331,7 +362,7 @@
 
                 call.on('close', () => resetCallUI());
             }).catch(err => {
-                alert("Gagal mengakses mikrofon. Izinkan akses mikrofon untuk menelepon.");
+                alert("Gagal mengakses mikrofon: " + err.message + "\n\nPastikan Anda memberikan izin mikrofon di browser.");
             });
         }
 
