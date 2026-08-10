@@ -216,6 +216,7 @@
         .btn-send { background: var(--accent); color: white; width: 50px; height: 50px; box-shadow: 0 0 15px rgba(255, 0, 127, 0.5); }
         .btn-call { background: #2d1b4e; color: var(--accent); border: 1px solid var(--accent); }
         .btn-end { background: #500000; color: #ff4444; border: 1px solid #ff4444; display: none; }
+        .btn-speaker { background: #1a4d2e; color: #4ade80; border: 1px solid #4ade80; display: none; }
 
         /* EMPTY STATE */
         .empty-state { 
@@ -281,6 +282,7 @@
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">
+                <button id="btn-speaker" class="icon-btn btn-speaker" onclick="toggleSpeaker()" title="Loudspeaker">🔊</button>
                 <button id="btn-call" class="icon-btn btn-call" onclick="startCall()">📞</button>
                 <button id="btn-end" class="icon-btn btn-end" onclick="endCall()">📴</button>
             </div>
@@ -301,7 +303,8 @@
     </div>
 </div>
 
-<audio id="remote-audio" autoplay></audio>
+<!-- Audio dengan fitur loudspeaker -->
+<audio id="remote-audio" autoplay playsinline></audio>
 
 <script>
     let peer = null;
@@ -310,7 +313,8 @@
     let currentCall = null;
     let localStream = null;
     let unreadCounts = {};
-    const MAX_FILE_SIZE = 500 * 1024; 
+    let isSpeakerOn = false;
+    const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
 
     const adminId = 'MadamTi-' + Math.floor(Math.random() * 10000);
     peer = new Peer(adminId);
@@ -322,14 +326,10 @@
     peer.on('connection', (conn) => {
         connections[conn.peer] = conn;
         unreadCounts[conn.peer] = 0;
-        
-        // Simpan data pasien (nama akan dikirim setelah connect)
         conn.patientData = { name: 'Menunggu nama...', id: conn.peer };
-        
         updatePatientList();
         
         conn.on('data', (data) => {
-            // Jika data adalah info pasien (nama)
             if (data.type === 'patientInfo') {
                 conn.patientData.name = data.name;
                 updatePatientList();
@@ -358,15 +358,71 @@
     peer.on('call', (call) => {
         if(connections[call.peer]) {
             selectPatient(call.peer);
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then((stream) => {
-                    localStream = stream;
-                    call.answer(stream);
-                    handleCall(call);
-                })
-                .catch(err => alert("Gagal akses mikrofon"));
+            
+            // Tampilkan notifikasi panggilan masuk
+            if(confirm(`🔮 Panggilan masuk dari ${connections[call.peer].patientData.name}\n\nTerima dengan Loudspeaker?`)) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then((stream) => {
+                        localStream = stream;
+                        call.answer(stream);
+                        handleCall(call);
+                        enableLoudspeaker();
+                    })
+                    .catch(err => alert("Gagal akses mikrofon: " + err));
+            } else {
+                call.close();
+            }
         }
     });
+
+    // --- FUNGSI LOUDSPEAKER ---
+    function enableLoudspeaker() {
+        const audio = document.getElementById('remote-audio');
+        
+        // Coba aktifkan loudspeaker (browser support terbatas)
+        if (audio.setSinkId && typeof audio.setSinkId === 'function') {
+            // Untuk browser yang mendukung setSinkId (Chrome Desktop)
+            audio.setSinkId('').then(() => {
+                isSpeakerOn = true;
+                updateSpeakerButton();
+            }).catch(err => {
+                console.log('Speaker switch not supported');
+            });
+        } else {
+            // Fallback: Set volume maksimal dan beri tahu user
+            audio.volume = 1.0;
+            isSpeakerOn = true;
+            updateSpeakerButton();
+            
+            // Untuk mobile, beri instruksi manual
+            if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                addSystemMessage("📱 Di HP, aktifkan Loudspeaker manual dari pengaturan panggilan");
+            }
+        }
+    }
+
+    function toggleSpeaker() {
+        isSpeakerOn = !isSpeakerOn;
+        const audio = document.getElementById('remote-audio');
+        
+        if (isSpeakerOn) {
+            audio.volume = 1.0;
+            if (audio.setSinkId) {
+                audio.setSinkId('').catch(() => {});
+            }
+        } else {
+            audio.volume = 0.5;
+        }
+        
+        updateSpeakerButton();
+    }
+
+    function updateSpeakerButton() {
+        const btn = document.getElementById('btn-speaker');
+        btn.style.display = isSpeakerOn ? 'flex' : 'none';
+        btn.innerHTML = isSpeakerOn ? '🔊' : '🔉';
+        btn.style.background = isSpeakerOn ? '#1a4d2e' : '#2d1b4e';
+    }
 
     // --- FILE HANDLING ---
     function handleFileSelect(event) {
@@ -374,7 +430,7 @@
         if (!file || !activePeerId) return;
 
         if (file.size > MAX_FILE_SIZE) {
-            alert(`Berkas terlalu besar! Maksimal 500KB.`);
+            alert(`Berkas terlalu besar! Maksimal 3MB.\nUkuran file: ${(file.size / (1024*1024)).toFixed(1)}MB`);
             event.target.value = '';
             return;
         }
@@ -543,6 +599,7 @@
                 localStream = stream;
                 const call = peer.call(activePeerId, stream);
                 handleCall(call);
+                enableLoudspeaker();
             })
             .catch(err => alert("Gagal akses mikrofon"));
     }
@@ -551,11 +608,12 @@
         currentCall = call;
         document.getElementById('btn-call').style.display = 'none';
         document.getElementById('btn-end').style.display = 'flex';
+        document.getElementById('btn-speaker').style.display = 'flex';
         
         call.on('stream', (remoteStream) => {
             document.getElementById('remote-audio').srcObject = remoteStream;
             document.getElementById('remote-audio').play();
-            addSystemMessage("🔊 Saluran Suara Terbuka");
+            addSystemMessage("🔊 Saluran Suara Terbuka (Loudspeaker Aktif)");
         });
 
         call.on('close', endCallUI);
@@ -570,6 +628,8 @@
     function endCallUI() {
         document.getElementById('btn-call').style.display = 'flex';
         document.getElementById('btn-end').style.display = 'none';
+        document.getElementById('btn-speaker').style.display = 'none';
+        isSpeakerOn = false;
         addSystemMessage("Saluran Suara Ditutup");
     }
 
