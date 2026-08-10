@@ -16,13 +16,11 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         
-        html, body { height: 100%; overflow: hidden; }
-        body { 
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
             font-family: 'Lato', sans-serif; 
             background: radial-gradient(circle at center, #2e004f 0%, #000000 100%); 
-            height: 100dvh;
-            display: flex; 
-            flex-direction: column; 
             color: #e0e0e0; 
         }
         h1, h2 { font-family: 'Cinzel', serif; }
@@ -102,6 +100,7 @@
             background: #0f0518; 
             color: white; 
             outline: none;
+            min-width: 0;
         }
 
         .icon-btn { 
@@ -117,6 +116,7 @@
             background: #2d1b4e; 
             color: white;
             transition: 0.2s;
+            flex-shrink: 0;
         }
         .icon-btn:active { transform: scale(0.9); }
         .btn-send { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
@@ -131,9 +131,45 @@
         
         #file-input, #camera-input { display: none; }
         .loading-status { text-align: center; color: var(--primary); font-size: 0.8em; padding: 5px; }
+
+        /* NOTIFICATION POPUP */
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+            max-width: 90%;
+            width: 350px;
+        }
+        .notification-popup.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .notification-icon { font-size: 1.5em; }
+        .notification-content { flex: 1; min-width: 0; }
+        .notification-title { font-weight: bold; font-size: 0.9em; margin-bottom: 3px; }
+        .notification-message { font-size: 0.85em; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
 </head>
 <body>
+    <!-- NOTIFICATION POPUP -->
+    <div id="notification" class="notification-popup">
+        <div class="notification-icon">💬</div>
+        <div class="notification-content">
+            <div class="notification-title" id="notif-title">Pesan Baru</div>
+            <div class="notification-message" id="notif-message">...</div>
+        </div>
+    </div>
+
     <div class="header">
         <h2>🔮 Konsultasi Madam Ti'</h2>
         <div class="madam-status" id="header-status"></div>
@@ -164,7 +200,7 @@
                 <label for="camera-input" class="icon-btn" title="Kamera">📷</label>
                 <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
                 
-                <label for="file-input" class="icon-btn" style="font-size:1em;" title="File">📎</label>
+                <label for="file-input" class="icon-btn" style="font-size:1em;" title="File"></label>
                 <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
 
                 <input type="text" id="msgInput" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter') sendMsg()">
@@ -184,22 +220,23 @@
         let isCalling = false;
         const MAX_FILE_SIZE = 3 * 1024 * 1024;
 
-        // Inisialisasi Peer - Session TIDAK ADA EXPIRED
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
         peer.on('open', (id) => {
-            console.log('✅ Pasien online dengan ID:', id);
+            console.log('✅ Pasien online:', id);
         });
 
         peer.on('error', (err) => {
             console.error('Peer Error:', err);
         });
 
-        // Auto reconnect jika terputus - tanpa batas waktu
         peer.on('disconnected', () => {
-            console.log('⚠️ Terputus sementara, mencoba reconnect...');
+            console.log('⚠️ Reconnecting...');
             setTimeout(() => {
-                if (peer.disconnected && conn) {
-                    peer.reconnect();
-                }
+                if (peer.disconnected && conn) peer.reconnect();
             }, 3000);
         });
 
@@ -207,14 +244,12 @@
             const adminId = document.getElementById('adminId').value.trim();
             const patientName = document.getElementById('patientName').value.trim();
             
-            if(!patientName) return alert("Masukkan nama Anda terlebih dahulu!");
-            if(!adminId) return alert("Masukkan ID Spiritual Madam Ti'!");
+            if(!patientName) return alert("Masukkan nama Anda!");
+            if(!adminId) return alert("Masukkan ID Madam Ti'!");
             
             document.getElementById('status').innerText = "Menghubungkan...";
             
-            if (peer.disconnected) {
-                peer.reconnect();
-            }
+            if (peer.disconnected) peer.reconnect();
             
             conn = peer.connect(adminId);
             
@@ -226,7 +261,6 @@
                 document.getElementById('header-status').innerText = "● Terhubung dengan Madam Ti'";
                 
                 addSystemBubble("Anda terhubung. Silakan mulai konsultasi.");
-                console.log('✅ Terhubung dengan Madam Ti');
             });
 
             conn.on('data', (data) => {
@@ -240,20 +274,47 @@
                     box.appendChild(div);
                     box.scrollTop = box.scrollHeight;
                 }
+                
+                // NOTIFIKASI
+                showNotification('Madam Ti\'', data.type === 'file' ? ' Mengirim foto' : data.text);
+                
                 if(navigator.vibrate) navigator.vibrate(100);
             });
             
             conn.on('error', (err) => {
                 console.error('Connection error:', err);
-                alert("Gagal terhubung: " + err + "\n\nPastikan ID Spiritual benar dan Madam Ti' sedang online.");
+                alert("Gagal terhubung: " + err);
                 document.getElementById('status').innerText = "Koneksi gagal.";
             });
 
             conn.on('close', () => {
                 console.log('❌ Koneksi ditutup');
-                alert("Koneksi terputus dari sisi Madam Ti'");
+                alert("Koneksi terputus");
                 location.reload();
             });
+        }
+
+        // --- NOTIFICATION FUNCTION ---
+        function showNotification(title, message) {
+            // Browser Notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: message,
+                    icon: '',
+                    vibrate: [200, 100, 200]
+                });
+            }
+            
+            // In-App Popup
+            const popup = document.getElementById('notification');
+            document.getElementById('notif-title').innerText = title;
+            document.getElementById('notif-message').innerText = message;
+            
+            popup.classList.add('show');
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
         }
 
         function sendMsg() {
@@ -280,7 +341,7 @@
             if (!file) return;
 
             if (file.size > MAX_FILE_SIZE) {
-                alert(`Berkas terlalu besar! Maksimal 3MB.\nUkuran Anda: ${(file.size / (1024*1024)).toFixed(1)}MB`);
+                alert(`File terlalu besar! Maksimal 3MB.`);
                 event.target.value = '';
                 return;
             }
@@ -289,7 +350,7 @@
             const box = document.getElementById('chat-box');
             const status = document.createElement('div');
             status.className = 'loading-status';
-            status.innerHTML = `⏳ Mengirim (${fileSizeMB}MB)... Mohon tunggu`;
+            status.innerHTML = `⏳ Mengirim (${fileSizeMB}MB)...`;
             box.appendChild(status);
             box.scrollTop = box.scrollHeight;
 
@@ -304,7 +365,7 @@
                 event.target.value = '';
             };
             reader.onerror = function() {
-                status.innerHTML = '❌ Gagal mengirim file.';
+                status.innerHTML = '❌ Gagal mengirim.';
             };
             reader.readAsDataURL(file);
         }
@@ -322,10 +383,10 @@
                 content = `
                     <div class="file-attachment">
                         <div class="file-info">
-                            <span>📎</span>
+                            <span></span>
                             <div style="flex:1; overflow:hidden;">
                                 <div style="font-weight:600; font-size:0.85em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${fileData.name}</div>
-                                <a href="${fileData.data}" download="${fileData.name}" class="download-link">⬇ Simpan</a>
+                                <a href="${fileData.data}" download="${fileData.name}" class="download-link"> Simpan</a>
                             </div>
                         </div>
                     </div>
@@ -353,8 +414,8 @@
                 isCalling = true;
                 const btn = document.getElementById('btn-call');
                 btn.classList.add('active-call');
-                btn.innerHTML = '📴';
-                addSystemBubble("🔊 Panggilan suara dimulai...");
+                btn.innerHTML = '';
+                addSystemBubble("🔊 Panggilan dimulai...");
                 
                 call.on('stream', (remoteStream) => {
                     document.getElementById('remoteAudio').srcObject = remoteStream;
@@ -363,7 +424,7 @@
 
                 call.on('close', () => resetCallUI());
             }).catch(err => {
-                alert("Gagal mengakses mikrofon: " + err.message + "\n\nPastikan Anda memberikan izin mikrofon di browser.");
+                alert("Gagal akses mikrofon: " + err.message);
             });
         }
 
@@ -378,24 +439,19 @@
             const btn = document.getElementById('btn-call');
             btn.classList.remove('active-call');
             btn.innerHTML = '📞';
-            addSystemBubble("Panggilan suara diakhiri.");
+            addSystemBubble("Panggilan diakhiri.");
         }
 
-        // --- KEEP SESSION ALIVE ---
-        // Mencegah browser sleep yang bisa memutus koneksi
+        // Keep session alive
         setInterval(() => {
-            console.log('💫 Session tetap aktif...');
-        }, 60000); // Log setiap 1 menit
+            console.log('💫 Session aktif...');
+        }, 60000);
 
-        // Mencegah screen sleep (optional, tidak semua browser support)
+        // Wake lock
         if ('wakeLock' in navigator) {
             try {
-                navigator.wakeLock.request('screen').then(() => {
-                    console.log(' Screen Wake Lock aktif');
-                });
-            } catch (err) {
-                console.log('Wake Lock tidak didukung');
-            }
+                navigator.wakeLock.request('screen');
+            } catch (err) {}
         }
     </script>
 </body>
